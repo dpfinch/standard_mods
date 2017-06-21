@@ -12,18 +12,20 @@ def area(lat,lon):
     # Return area of grid box in m2 - using the same method as GEOS-Chem
     # Method found in GeosUtil/global_grid_mod.F90
     area_grid = np.zeros([len(lat),len(lon)])
-    resolution = lat[1] - lat[0]
+    resolution = lat[2] - lat[1]
     edge_dist = resolution / 2.
     # Earth Radius from km to m
     Re = distance.EARTH_RADIUS * 1e3
 
     for ll in range(len(lat)):
-        area = (2 * np.pi * (Re**2) / len(lon)) * (np.sin(math.radians(lat[ll] + edge_dist)) - np.sin(math.radians(lat[ll] - edge_dist)))
+        area = ((2 * np.pi * (Re**2)) / len(lon)) * (np.sin(math.radians(lat[ll] + edge_dist)) - np.sin(math.radians(lat[ll] - edge_dist)))
+        # area = ((2 * np.pi * (Re**2)) / len(lon)) * (np.sin((lat[ll] + edge_dist)) - np.sin((lat[ll] - edge_dist)))
         area_grid[ll,:] = area
 
     global_surface = 5.101e14 # m^2
-    limit = 1e12 # 1% buffer
-    if global_surface + limit < np.sum(area_grid) < global_surface - limit:
+    limit = 5.1e12 # 1% buffer
+
+    if global_surface + limit < np.sum(area_grid) or np.sum(area_grid) < global_surface - limit:
         print "WARNING - global surface area not a good match"
         print "Calculated area to be %r not %r" % (np.sum(area_grid),global_surface)
     return area_grid
